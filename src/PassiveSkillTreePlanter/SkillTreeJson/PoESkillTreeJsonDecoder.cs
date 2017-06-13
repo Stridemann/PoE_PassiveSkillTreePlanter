@@ -22,8 +22,8 @@ namespace PassiveSkillTreePlanter.SkillTreeJson
                 Error = (sender, args) =>
                 {
                     // This one is known: "509":{"x":_,"y":_,"oo":[],"n":[]}} has an Array in "oo".
-                    if (args.ErrorContext.Path != "groups.509.oo")
-                        PoeHUD.Plugins.BasePlugin.LogError("Exception while deserializing Json tree" + args.ErrorContext.Error, 5);
+                    //if (args.ErrorContext.Path != "groups.509.oo")
+                    //    PoeHUD.Plugins.BasePlugin.LogError("Exception while deserializing Json tree" + args.ErrorContext.Error, 5);
                     args.ErrorContext.Handled = true;
                 }
             };
