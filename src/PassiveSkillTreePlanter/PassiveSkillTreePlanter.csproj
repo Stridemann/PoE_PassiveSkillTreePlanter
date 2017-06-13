@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MzQMeAB">
+      <HintPath>..\..\..\..\Users\Stridemann\Desktop\PoEHUD_DirectX11\MzQMeAB.exe</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -64,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PassiveSkillTreeJson_Downloader.cs" />
     <Compile Include="SkillNode.cs" />
     <Compile Include="PassiveSkillTreePlanter.cs" />
     <Compile Include="PassiveSkillTreePlanter_Settings.cs" />

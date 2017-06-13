@@ -24,6 +24,11 @@ namespace PassiveSkillTreePlanter
 
         public override void Initialise()
         {
+            Settings.UpdateTree.OnValueChanged += delegate
+            {
+                DownloadTree();
+                Settings.UpdateTree.Value = false;
+            };
             var skillTreeUrlPath = LocalPluginDirectory + @"\" + SkillTreeUrlFile;
 
             if (!File.Exists(skillTreeUrlPath))
@@ -71,6 +76,12 @@ namespace PassiveSkillTreePlanter
                 Graphics.Render += ExtRender;
         }
 
+        private async void DownloadTree()
+        {
+            var skillTreeDataPath = LocalPluginDirectory + @"\" + SkillTreeDataFile;
+            await PassiveSkillTreeJson_Downloader.DownloadSkillTreeToFileAsync(skillTreeDataPath);
+            LogMessage("Skill tree updated!", 3);
+        }
 
 
         private bool bUiRootInitialized = false;

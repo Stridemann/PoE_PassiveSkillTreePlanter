@@ -4,6 +4,8 @@ using SharpDX;
 
 namespace PassiveSkillTreePlanter.SkillTreeJson
 {
+    //Many thanks to https://github.com/EmmittJ/PoESkillTree
+
     public class PoESkillTreeJsonDecoder
     {
         public PoESkillTree SkillTree;

@@ -10,6 +10,7 @@ namespace PassiveSkillTreePlanter
             Enable = false;
             BorderWidth = new RangeNode<int>(1, 1, 5);
             BorderColor = new ColorNode(SharpDX.Color.Red);
+            UpdateTree = false;
         }
 
         [Menu("Border Width")]
@@ -17,5 +18,8 @@ namespace PassiveSkillTreePlanter
 
         [Menu("Border Color")]
         public ColorNode BorderColor { get; set; }
+
+        [Menu("Download/Update skill tree data")]
+        public ToggleNode UpdateTree { get; set; }
     }
 }
