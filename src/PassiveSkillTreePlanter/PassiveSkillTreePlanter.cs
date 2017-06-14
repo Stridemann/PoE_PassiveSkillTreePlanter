@@ -27,14 +27,22 @@ namespace PassiveSkillTreePlanter
             Settings.UpdateTree.OnValueChanged += delegate
             {
                 DownloadTree();
-                Settings.UpdateTree.Value = false;
             };
-            var skillTreeUrlPath = LocalPluginDirectory + @"\" + SkillTreeUrlFile;
 
-            if (!File.Exists(skillTreeUrlPath))
+            var skillTreeUrlFilePath = LocalPluginDirectory + @"\" + SkillTreeUrlFile;
+
+            if (!File.Exists(skillTreeUrlFilePath))
             {
                 LogMessage("Write your skill tree url to " + SkillTreeUrlFile + " file.", 10);
-                File.Create(skillTreeUrlPath);
+                File.Create(skillTreeUrlFilePath);
+                return;
+            }
+
+            string skillTreeUrl = File.ReadAllText(skillTreeUrlFilePath);
+
+            if (!DecodeUrl(skillTreeUrl))
+            {
+                LogMessage("Write your skill tree url to " + SkillTreeUrlFile + " file.", 10);
                 return;
             }
 
@@ -44,17 +52,6 @@ namespace PassiveSkillTreePlanter
                 LogMessage("Can't find file " + SkillTreeDataFile + " with skill tree data.", 10);
                 return;
             }
-
-            string skillTreeUrl = File.ReadAllText(skillTreeUrlPath);
-
-
-            if(!skillTreeUrl.Contains("pathofexile.com/passive-skill-tree/"))
-            {
-                LogMessage("Write your skill tree url to " + SkillTreeUrlFile + " file.", 10);
-                return;
-            }
-
-            UrlNodes = PathOfExileUrlDecoder.Decode(skillTreeUrl);
 
             string skillTreeJson = File.ReadAllText(skillTreeDataPath);
             SkillTreeeData.Decode(skillTreeJson);
@@ -81,7 +78,7 @@ namespace PassiveSkillTreePlanter
 
                     if (!SkillTreeeData.Skillnodes.ContainsKey(lNodeId))
                     {
-                        LogError("Can't find passive skill tree node with id: " + lNodeId + " to draw link", 3);
+                        LogError("Can't find passive skill tree node with id: " + lNodeId + " to draw the link", 3);
                         continue;
                     }
                     var lNode = SkillTreeeData.Skillnodes[lNodeId];
@@ -94,6 +91,23 @@ namespace PassiveSkillTreePlanter
 
             if (DrawNodes.Count > 0)
                 Graphics.Render += ExtRender;
+        }
+
+ 
+
+        private bool DecodeUrl(string url)
+        {
+            if (PoePlannerUrlDecoder.UrlMatch(url))
+            {
+                UrlNodes = PoePlannerUrlDecoder.Decode(url);
+                return true;
+            }
+            else if (PathOfExileUrlDecoder.UrlMatch(url))
+            {
+                UrlNodes = PathOfExileUrlDecoder.Decode(url);
+                return true;
+            }
+            return false;
         }
 
         private async void DownloadTree()

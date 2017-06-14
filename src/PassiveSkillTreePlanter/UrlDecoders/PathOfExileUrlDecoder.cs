@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace PassiveSkillTreePlanter.UrlDecoders
 {
     public class PathOfExileUrlDecoder
     {
+        //Many thanks to https://github.com/EmmittJ/PoESkillTree
+
+        private static readonly Regex UrlRegex = new Regex(@"(http(|s):\/\/|)(\w*\.|)poeplanner\.com\/(?<build>[\w-=]+)");
+
+        public static bool UrlMatch(string buildUrl)
+        {
+            return UrlRegex.IsMatch(buildUrl);
+        }
+
         public static List<ushort> Decode(string url)
         {
             List<ushort> nodesId = new List<ushort>();
