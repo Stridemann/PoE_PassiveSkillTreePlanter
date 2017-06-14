@@ -160,8 +160,8 @@ namespace PassiveSkillTreePlanter
                     var linkDrawPosX = (UiSkillTreeBase.X + link.X + OffsetX) * scale;
                     var linkDrawPosY = (UiSkillTreeBase.Y + link.Y + OffsetY) * scale;
 
-                    if(Settings.LineWidth > 0)
-                        Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.Lineolor);
+                    //if(Settings.LineWidth > 0)
+                    //    Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.Lineolor);
                 }
             }
         }
