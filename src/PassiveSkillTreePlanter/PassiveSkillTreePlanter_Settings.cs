@@ -12,7 +12,7 @@ namespace PassiveSkillTreePlanter
             BorderWidth = new RangeNode<int>(1, 1, 5);
             BorderColor = new ColorNode(Color.Red);
             LineWidth = new RangeNode<int>(3, 0, 5);
-            Lineolor = new ColorNode(new Color(0, 255, 0, 50));
+            LineColor = new ColorNode(new Color(0, 255, 0, 50));
             UpdateTree = false;
         }
 
@@ -26,7 +26,7 @@ namespace PassiveSkillTreePlanter
         public RangeNode<int> LineWidth { get; set; }
 
         [Menu("Lines Color")]
-        public ColorNode Lineolor { get; set; }
+        public ColorNode LineColor { get; set; }
 
         [Menu("Download/Update skill tree data")]
         public ToggleNode UpdateTree { get; set; }

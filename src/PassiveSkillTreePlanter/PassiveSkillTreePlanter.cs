@@ -91,8 +91,18 @@ namespace PassiveSkillTreePlanter
 
             if (DrawNodes.Count > 0)
                 Graphics.Render += ExtRender;
+
+            CheckDrawLineMethod();
         }
 
+        private System.Reflection.MethodInfo DrawLineMethod = null;
+        private void CheckDrawLineMethod()
+        {
+            DrawLineMethod = typeof(PoeHUD.Hud.UI.Graphics).GetMethod("DrawLine");
+
+            if (DrawLineMethod == null)
+                LogMessage("Update PoeHud to see the lines between nodes.", 15);
+        }
  
 
         private bool DecodeUrl(string url)
@@ -174,8 +184,14 @@ namespace PassiveSkillTreePlanter
                     var linkDrawPosX = (UiSkillTreeBase.X + link.X + OffsetX) * scale;
                     var linkDrawPosY = (UiSkillTreeBase.Y + link.Y + OffsetY) * scale;
 
-                    //if(Settings.LineWidth > 0)
-                    //    Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.Lineolor);
+                    if (Settings.LineWidth > 0)
+                    {
+                        if(DrawLineMethod != null)
+                        {
+                            DrawLineMethod.Invoke(Graphics, new object[] { new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), (float)Settings.LineWidth.Value, Settings.LineColor.Value });
+                        }
+                        //Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.Lineolor);
+                    }
                 }
             }
         }
