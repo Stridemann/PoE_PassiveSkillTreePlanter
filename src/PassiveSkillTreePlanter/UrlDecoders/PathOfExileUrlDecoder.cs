@@ -8,7 +8,7 @@ namespace PassiveSkillTreePlanter.UrlDecoders
     {
         //Many thanks to https://github.com/EmmittJ/PoESkillTree
 
-        private static readonly Regex UrlRegex = new Regex(@"(http(|s):\/\/|)(\w*\.|)poeplanner\.com\/(?<build>[\w-=]+)");
+        private static readonly Regex UrlRegex = new Regex(@"(http(|s):\/\/|)(\w*\.|)pathofexile\.com\/(fullscreen-|)passive-skill-tree\/(?<build>[\w-=]+)");
 
         public static bool UrlMatch(string buildUrl)
         {
