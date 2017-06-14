@@ -31,31 +31,27 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MzQMeAB">
-      <HintPath>..\..\..\..\Users\Stridemann\Desktop\PoEHUD_DirectX11\MzQMeAB.exe</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="PoeHud">
-      <HintPath>..\..\..\..\Users\Stridemann\Desktop\PoEHUD_DirectX11\PoeHud.exe</HintPath>
+    <Reference Include="PoeHUD">
+      <HintPath>..\..\..\PoEHUD\PoeHUD.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\..\..\..\Users\Stridemann\Desktop\PoEHUD_DirectX11\lib\SharpDX.dll</HintPath>
+      <HintPath>..\..\..\PoEHUD\lib\SharpDX.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX.Desktop">
-      <HintPath>..\..\..\..\Users\Stridemann\Desktop\PoEHUD_DirectX11\lib\SharpDX.Desktop.dll</HintPath>
+      <HintPath>..\..\..\PoEHUD\lib\SharpDX.Desktop.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>..\..\..\..\Users\Stridemann\Desktop\PoEHUD_DirectX11\lib\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>..\..\..\PoEHUD\lib\SharpDX.Direct3D9.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>..\..\..\..\Users\Stridemann\Desktop\PoEHUD_DirectX11\lib\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>..\..\..\PoEHUD\lib\SharpDX.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />

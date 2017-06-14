@@ -45,6 +45,7 @@ namespace PassiveSkillTreePlanter.SkillTreeJson
                     bMastery = nd.m,
                     bMult = nd.isMultipleChoice,
                     bNotable = nd.not,
+                    linkedNodes = nd.ot
                 };
                 Nodes.Add(skillNode);
                 Skillnodes.Add(nd.id, skillNode);

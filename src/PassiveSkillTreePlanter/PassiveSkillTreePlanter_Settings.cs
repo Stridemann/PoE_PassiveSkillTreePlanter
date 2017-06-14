@@ -1,5 +1,6 @@
 ﻿using PoeHUD.Hud.Settings;
 using PoeHUD.Plugins;
+using SharpDX;
 
 namespace PassiveSkillTreePlanter
 {
@@ -9,7 +10,9 @@ namespace PassiveSkillTreePlanter
         {
             Enable = false;
             BorderWidth = new RangeNode<int>(1, 1, 5);
-            BorderColor = new ColorNode(SharpDX.Color.Red);
+            BorderColor = new ColorNode(Color.Red);
+            LineWidth = new RangeNode<int>(3, 0, 5);
+            Lineolor = new ColorNode(new Color(0, 255, 0, 50));
             UpdateTree = false;
         }
 
@@ -18,6 +21,12 @@ namespace PassiveSkillTreePlanter
 
         [Menu("Border Color")]
         public ColorNode BorderColor { get; set; }
+
+        [Menu("Lines Width")]
+        public RangeNode<int> LineWidth { get; set; }
+
+        [Menu("Lines Color")]
+        public ColorNode Lineolor { get; set; }
 
         [Menu("Download/Update skill tree data")]
         public ToggleNode UpdateTree { get; set; }

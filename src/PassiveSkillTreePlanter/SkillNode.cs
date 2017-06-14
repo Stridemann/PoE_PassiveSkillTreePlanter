@@ -21,11 +21,12 @@ namespace PassiveSkillTreePlanter
         public bool bKeyStone;
         public bool bMastery;
         public bool bNotable;
-
+        public List<ushort> linkedNodes = new List<ushort>();
 
         //Cached for drawing
         public float DrawSize = 100;
         public Vector2 DrawPosition;
+        public List<Vector2> DrawNodeLinks = new List<Vector2>();
 
         public void Init()
         {

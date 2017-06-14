@@ -70,6 +70,26 @@ namespace PassiveSkillTreePlanter
                 var node = SkillTreeeData.Skillnodes[urlNodeId];
                 node.Init();
                 DrawNodes.Add(node);
+
+
+                List<ushort> dontDrawLinesTwice = new List<ushort>();
+
+                foreach (var lNodeId in node.linkedNodes)
+                {
+                    if (!UrlNodes.Contains(lNodeId)) continue;
+                    if(dontDrawLinesTwice.Contains(lNodeId)) continue;
+
+                    if (!SkillTreeeData.Skillnodes.ContainsKey(lNodeId))
+                    {
+                        LogError("Can't find passive skill tree node with id: " + lNodeId + " to draw link", 3);
+                        continue;
+                    }
+                    var lNode = SkillTreeeData.Skillnodes[lNodeId];
+
+                    node.DrawNodeLinks.Add(lNode.Position);
+                }
+
+                dontDrawLinesTwice.Add(urlNodeId);
             }
 
             if (DrawNodes.Count > 0)
@@ -129,10 +149,20 @@ namespace PassiveSkillTreePlanter
             {
                 var DrawSize = node.DrawSize * scale;
 
-                var posX = (UiSkillTreeBase.X + node.DrawPosition.X + OffsetX) * scale - DrawSize / 2;
-                var posY = (UiSkillTreeBase.Y + node.DrawPosition.Y + OffsetY) * scale - DrawSize / 2;
+                var posX = (UiSkillTreeBase.X + node.DrawPosition.X + OffsetX) * scale;
+                var posY = (UiSkillTreeBase.Y + node.DrawPosition.Y + OffsetY) * scale;
 
-                Graphics.DrawFrame(new RectangleF((float)posX, (float)posY, DrawSize, DrawSize), Settings.BorderWidth, Settings.BorderColor);
+                Graphics.DrawFrame(new RectangleF(posX - DrawSize / 2, posY - DrawSize / 2, DrawSize, DrawSize), Settings.BorderWidth, Settings.BorderColor);
+
+
+                foreach (var link in node.DrawNodeLinks)
+                {
+                    var linkDrawPosX = (UiSkillTreeBase.X + link.X + OffsetX) * scale;
+                    var linkDrawPosY = (UiSkillTreeBase.Y + link.Y + OffsetY) * scale;
+
+                    if(Settings.LineWidth > 0)
+                        Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.Lineolor);
+                }
             }
         }
 
