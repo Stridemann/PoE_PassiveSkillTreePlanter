@@ -35,23 +35,23 @@
       <HintPath>..\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="PoeHUD">
-      <HintPath>..\..\..\PoEHUD\PoeHUD.exe</HintPath>
+      <HintPath>..\..\..\PoEHUDx64\PoeHUD.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX">
-      <HintPath>..\..\..\PoEHUD\lib\SharpDX.dll</HintPath>
+      <HintPath>..\..\..\PoEHUDx64\lib\SharpDX.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX.Desktop">
-      <HintPath>..\..\..\PoEHUD\lib\SharpDX.Desktop.dll</HintPath>
+      <HintPath>..\..\..\PoEHUDx64\lib\SharpDX.Desktop.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX.Direct3D9">
-      <HintPath>..\..\..\PoEHUD\lib\SharpDX.Direct3D9.dll</HintPath>
+      <HintPath>..\..\..\PoEHUDx64\lib\SharpDX.Direct3D9.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SharpDX.Mathematics">
-      <HintPath>..\..\..\PoEHUD\lib\SharpDX.Mathematics.dll</HintPath>
+      <HintPath>..\..\..\PoEHUDx64\lib\SharpDX.Mathematics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />

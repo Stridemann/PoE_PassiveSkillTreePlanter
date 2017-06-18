@@ -6,7 +6,7 @@ using PoeHUD.Poe;
 using PassiveSkillTreePlanter.UrlDecoders;
 using PassiveSkillTreePlanter.SkillTreeJson;
 using PoeHUD.Framework;
-
+using System.Linq;
 
 namespace PassiveSkillTreePlanter
 {
@@ -19,22 +19,47 @@ namespace PassiveSkillTreePlanter
         private List<ushort> UrlNodes = new List<ushort>();//List of nodes decoded from URL
 
         private const string SkillTreeDataFile = "SkillTreeData.dat";
-        private const string SkillTreeUrlFile = "SkillTreeUrl.txt";
+        private const string SkillTreeDir = "Builds";
 
+        private string SkillTreeUrlFilesDir => LocalPluginDirectory + @"\" + SkillTreeDir;
 
         public override void Initialise()
         {
-            Settings.UpdateTree.OnValueChanged += delegate
+            Settings.UpdateTreeData.OnPressed += delegate
             {
                 DownloadTree();
             };
 
-            var skillTreeUrlFilePath = LocalPluginDirectory + @"\" + SkillTreeUrlFile;
+            Settings.UrlFileList.OnValueSelected += ReadUrlFromSelectedUrl;
+
+            if (!Directory.Exists(SkillTreeUrlFilesDir))
+            {
+                Directory.CreateDirectory(SkillTreeUrlFilesDir);
+                LogMessage("PassiveSkillTree: Write your skill tree url to txt file and place it to Builds folder.", 10);
+                return;
+            }
+
+            //Update url list variants
+            var dirInfo = new DirectoryInfo(SkillTreeUrlFilesDir);
+            var urlVariants = dirInfo.GetFiles("*.txt").Select(x => Path.GetFileNameWithoutExtension(x.Name)).ToList();
+            Settings.UrlFileList.SetListValues(urlVariants);
+
+
+            //Read url
+            ReadUrlFromSelectedUrl(Settings.UrlFileList.Value);
+
+            Graphics.Render += ExtRender;
+        }
+
+    
+
+        private void ReadUrlFromSelectedUrl(string fileName)
+        {
+            var skillTreeUrlFilePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
 
             if (!File.Exists(skillTreeUrlFilePath))
             {
-                LogMessage("Write your skill tree url to " + SkillTreeUrlFile + " file.", 10);
-                File.Create(skillTreeUrlFilePath);
+                LogMessage("PassiveSkillTree: Select build url from list in options.", 10);
                 return;
             }
 
@@ -42,26 +67,33 @@ namespace PassiveSkillTreePlanter
 
             if (!DecodeUrl(skillTreeUrl))
             {
-                LogMessage("Write your skill tree url to " + SkillTreeUrlFile + " file.", 10);
+                LogMessage("PassiveSkillTree: Can't decode url from file: " + skillTreeUrlFilePath, 10);
                 return;
             }
+ 
+            ProcessNodes();
+        }
 
+        private void ProcessNodes()
+        {
+            DrawNodes = new List<SkillNode>();
+
+            //Read data
             var skillTreeDataPath = LocalPluginDirectory + @"\" + SkillTreeDataFile;
             if (!File.Exists(skillTreeDataPath))
             {
-                LogMessage("Can't find file " + SkillTreeDataFile + " with skill tree data.", 10);
+                LogMessage("PassiveSkillTree: Can't find file " + SkillTreeDataFile + " with skill tree data.", 10);
                 return;
             }
 
             string skillTreeJson = File.ReadAllText(skillTreeDataPath);
             SkillTreeeData.Decode(skillTreeJson);
 
-
-            foreach(var urlNodeId in UrlNodes)
+            foreach (var urlNodeId in UrlNodes)
             {
-                if(!SkillTreeeData.Skillnodes.ContainsKey(urlNodeId))
+                if (!SkillTreeeData.Skillnodes.ContainsKey(urlNodeId))
                 {
-                    LogError("Can't find passive skill tree node with id: " + urlNodeId, 3);
+                    LogError("PassiveSkillTree: Can't find passive skill tree node with id: " + urlNodeId, 5);
                     continue;
                 }
                 var node = SkillTreeeData.Skillnodes[urlNodeId];
@@ -74,11 +106,11 @@ namespace PassiveSkillTreePlanter
                 foreach (var lNodeId in node.linkedNodes)
                 {
                     if (!UrlNodes.Contains(lNodeId)) continue;
-                    if(dontDrawLinesTwice.Contains(lNodeId)) continue;
+                    if (dontDrawLinesTwice.Contains(lNodeId)) continue;
 
                     if (!SkillTreeeData.Skillnodes.ContainsKey(lNodeId))
                     {
-                        LogError("Can't find passive skill tree node with id: " + lNodeId + " to draw the link", 3);
+                        LogError("PassiveSkillTree: Can't find passive skill tree node with id: " + lNodeId + " to draw the link", 5);
                         continue;
                     }
                     var lNode = SkillTreeeData.Skillnodes[lNodeId];
@@ -88,22 +120,8 @@ namespace PassiveSkillTreePlanter
 
                 dontDrawLinesTwice.Add(urlNodeId);
             }
-
-            if (DrawNodes.Count > 0)
-                Graphics.Render += ExtRender;
-
-            CheckDrawLineMethod();
         }
 
-        private System.Reflection.MethodInfo DrawLineMethod = null;
-        private void CheckDrawLineMethod()
-        {
-            DrawLineMethod = typeof(PoeHUD.Hud.UI.Graphics).GetMethod("DrawLine");
-
-            if (DrawLineMethod == null)
-                LogMessage("Update PoeHud to see the lines between nodes.", 15);
-        }
- 
 
         private bool DecodeUrl(string url)
         {
@@ -131,6 +149,8 @@ namespace PassiveSkillTreePlanter
         private bool bUiRootInitialized = false;
         private void ExtRender()
         {
+            if (DrawNodes.Count == 0) return;
+
             if (!GameController.InGame || !WinApi.IsForegroundWindow(GameController.Window.Process.MainWindowHandle)) return; 
 
 
@@ -186,11 +206,7 @@ namespace PassiveSkillTreePlanter
 
                     if (Settings.LineWidth > 0)
                     {
-                        if(DrawLineMethod != null)
-                        {
-                            DrawLineMethod.Invoke(Graphics, new object[] { new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), (float)Settings.LineWidth.Value, Settings.LineColor.Value });
-                        }
-                        //Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.Lineolor);
+                        Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.LineColor);
                     }
                 }
             }
