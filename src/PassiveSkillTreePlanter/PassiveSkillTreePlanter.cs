@@ -182,7 +182,7 @@ namespace PassiveSkillTreePlanter
                 return;
             }
 
-            var scale = Memory.ReadFloat(UiSkillTreeBase.Address + 0x88c);
+            var scale = UiSkillTreeBase.Scale;
 
 
             //Hand-picked values
