@@ -65,6 +65,8 @@ namespace PassiveSkillTreePlanter
 
             string skillTreeUrl = File.ReadAllText(skillTreeUrlFilePath);
 
+            skillTreeUrl = skillTreeUrl.Replace("3.0.0/", "");
+
             if (!DecodeUrl(skillTreeUrl))
             {
                 LogMessage("PassiveSkillTree: Can't decode url from file: " + skillTreeUrlFilePath, 10);
