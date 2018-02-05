@@ -35,6 +35,7 @@ namespace PassiveSkillTreePlanter
         private string SkillTreeUrlFilesDir => LocalPluginDirectory + @"\" + SkillTreeDir;
         private List<string> BuildFiles { get; set; }
         public IntPtr TextEditCallback { get; set; }
+        public static int selected = 0;
 
         public override void Initialise()
         {
@@ -143,69 +144,80 @@ namespace PassiveSkillTreePlanter
 
         private void ImGuiMenu()
         {
+            string[] settingName = { "Build Selection", "Build Edit", "Add Build", "Colors", "Sliders" };
             if (!Settings.ShowWindow) return;
-            bool isOpened = Settings.ShowWindow.Value;
+            var isOpened = Settings.ShowWindow.Value;
             ImGuiExtension.BeginWindow($"{PluginName} Settings", ref isOpened, Settings.LastSettingPos.X, Settings.LastSettingPos.Y, Settings.LastSettingSize.X, Settings.LastSettingSize.Y);
             Settings.ShowWindow.Value = isOpened;
-            if (ImGui.Button("Open Build Folder")) Process.Start(SkillTreeUrlFilesDir);
+
+            var listWidth = ImGui.GetWindowContentRegionWidth() * 0.25f;
+            var activeSettingWidth = ImGui.GetWindowContentRegionWidth() * 0.75f - 5;
+            var windowHeight = ImGui.GetWindowSize().Y - 35;
+
+            if (ImGui.BeginChild("LeftSettings", new System.Numerics.Vector2(listWidth, windowHeight), false, WindowFlags.Default))
+                for (var i = 0; i < settingName.Length; i++)
+                    if (ImGui.Selectable(settingName[i], selected == i))
+                        selected = i;
+
+            ImGui.EndChild();
             ImGui.SameLine();
-            if (ImGui.Button("Reload List")) LoadBuildFiles();
-            Settings.SelectedURLFile = ImGuiExtension.ComboBox("Build Files", Settings.SelectedURLFile, BuildFiles, out var tempBool, ComboFlags.HeightLarge);
-            if (tempBool) ReadUrlFromSelectedUrl(Settings.SelectedURLFile);
-            //if (ImGui.Button("Download/Update skill tree data")) DownloadTree(); // Disabled
-            if (ImGui.CollapsingHeader("Colors", "Colors", false, true))
-            {
-                ImGuiNative.igIndent(16f);
-                Settings.BorderColor.Value = ImGuiExtension.ColorPicker("Border Color", Settings.BorderColor);
-                Settings.LineColor.Value = ImGuiExtension.ColorPicker("Line Color", Settings.LineColor);
-                ImGuiNative.igUnindent(16f);
-            }
-
-            if (ImGui.CollapsingHeader("Sliders", "Sliders", true, true))
-            {
-                ImGuiNative.igIndent(16f);
-                Settings.BorderWidth.Value = ImGuiExtension.IntSlider("Border Width", Settings.BorderWidth);
-                Settings.LineWidth.Value = ImGuiExtension.IntSlider("Line Width", Settings.LineWidth);
-                ImGuiNative.igUnindent(16f);
-            }
-
-            if (ImGui.CollapsingHeader("Selected Build Edit", "Selected Build Edit", false, false))
-            {
-                ImGuiNative.igIndent(16f);
-                if (!string.IsNullOrEmpty(CurrentlySelectedBuildFile))
+            ImGui.PushStyleVar(StyleVar.ChildRounding, 5.0f);
+            if (ImGui.BeginChild("RightSettings", new System.Numerics.Vector2(activeSettingWidth, windowHeight), true, WindowFlags.Default))
+                switch (settingName[selected])
                 {
-                    CurrentlySelectedBuildFile = ImGuiExtension.InputText("##RenameLabel", CurrentlySelectedBuildFile, 1024, InputTextFlags.EnterReturnsTrue);
-                    ImGui.SameLine();
-                    if (ImGui.Button("Rename Currently Selected Build")) RenameFile(CurrentlySelectedBuildFile, Settings.SelectedURLFile);
-                    CurrentlySelectedBuildUrl = ImGuiExtension.InputText("##ChangeURL", CurrentlySelectedBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
-                    ImGui.SameLine();
-                    if (ImGui.Button("Change URL")) ReplaceUrlContents(Settings.SelectedURLFile, CurrentlySelectedBuildUrl);
-                }
-                else
-                    ImGui.Text("No Build Selected");
-                ImGuiNative.igUnindent(16f);
-            }
+                    case "Build Selection":
+                        if (ImGui.Button("Open Build Folder")) Process.Start(SkillTreeUrlFilesDir);
+                        ImGui.SameLine();
+                        if (ImGui.Button("Reload List")) LoadBuildFiles();
+                        Settings.SelectedURLFile = ImGuiExtension.ComboBox("Build Files", Settings.SelectedURLFile, BuildFiles, out var tempBool, ComboFlags.HeightLarge);
+                        if (tempBool) ReadUrlFromSelectedUrl(Settings.SelectedURLFile);
+                        break;
+                    case "Build Edit":
+                        if (!string.IsNullOrEmpty(CurrentlySelectedBuildFile))
+                        {
+                            CurrentlySelectedBuildFile = ImGuiExtension.InputText("##RenameLabel", CurrentlySelectedBuildFile, 1024, InputTextFlags.EnterReturnsTrue);
+                            ImGui.SameLine();
+                            if (ImGui.Button("Build")) RenameFile(CurrentlySelectedBuildFile, Settings.SelectedURLFile);
+                            CurrentlySelectedBuildUrl = ImGuiExtension.InputText("##ChangeURL", CurrentlySelectedBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
+                            ImGui.SameLine();
+                            if (ImGui.Button("Change URL")) ReplaceUrlContents(Settings.SelectedURLFile, CurrentlySelectedBuildUrl);
+                        }
+                        else
+                            ImGui.Text("No Build Selected");
 
+                        break;
+                    case "Add Build":
+                        AddNewBuildFile = ImGuiExtension.InputText("Build Name", AddNewBuildFile, 1024, InputTextFlags.EnterReturnsTrue);
+                        AddNewBuildUrl = ImGuiExtension.InputText("Build URL", AddNewBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
+                        if (ImGui.Button("Create Build"))
+                        {
+                            AddNewBuild(AddNewBuildFile, AddNewBuildUrl);
+                            AddNewBuildFile = "";
+                            AddNewBuildUrl = "";
+                        }
 
-            if (ImGui.CollapsingHeader("Add New Build", "Add New Build", false, false))
-            {
-                ImGuiNative.igIndent(16f);
-                AddNewBuildFile = ImGuiExtension.InputText("Build Name", AddNewBuildFile, 1024, InputTextFlags.EnterReturnsTrue);
-                AddNewBuildUrl = ImGuiExtension.InputText("Build URL", AddNewBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
-                if (ImGui.Button("Create Build"))
-                {
-                    AddNewBuild(AddNewBuildFile, AddNewBuildUrl);
-                    AddNewBuildFile = "";
-                    AddNewBuildUrl = "";
+                        break;
+                    case "Colors":
+                        Settings.BorderColor.Value = ImGuiExtension.ColorPicker("Border Color", Settings.BorderColor);
+                        Settings.LineColor.Value = ImGuiExtension.ColorPicker("Line Color", Settings.LineColor);
+                        break;
+                    case "Sliders":
+                        Settings.BorderWidth.Value = ImGuiExtension.IntSlider("Border Width", Settings.BorderWidth);
+                        Settings.LineWidth.Value = ImGuiExtension.IntSlider("Line Width", Settings.LineWidth);
+                        break;
                 }
-            }
+            ImGui.PopStyleVar();
+            ImGui.EndChild();
 
             // Storing window Position and Size changed by the user
-            Settings.LastSettingPos = ImGui.GetWindowPosition();
-            Settings.LastSettingSize = ImGui.GetWindowSize();
+            if (ImGui.GetWindowHeight() > 21)
+            {
+                Settings.LastSettingPos = ImGui.GetWindowPosition();
+                Settings.LastSettingSize = ImGui.GetWindowSize();
+            }
             ImGui.EndWindow();
         }
-
+        
         private void ReadUrlFromSelectedUrl(string fileName)
         {
             var skillTreeUrlFilePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
