@@ -35,7 +35,6 @@ namespace PassiveSkillTreePlanter
         private string SkillTreeUrlFilesDir => LocalPluginDirectory + @"\" + SkillTreeDir;
         private List<string> BuildFiles { get; set; }
         public IntPtr TextEditCallback { get; set; }
-        public static bool[] SideMenus = { false, true, false, false, false };
         public static int selected = 0;
 
         public override void Initialise()
