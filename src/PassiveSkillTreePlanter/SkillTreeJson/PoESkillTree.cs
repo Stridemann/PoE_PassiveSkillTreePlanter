@@ -162,12 +162,16 @@ namespace PassiveSkillTreePlanter
     {
         [JsonProperty("name")]
         public string name { get; set; }
+
         [JsonProperty("displayName")]
         public string displayName { get; set; }
+
         [JsonProperty("flavourText")]
         public string flavourText { get; set; }
+
         [JsonProperty("flavourTextRect")]
         public string flavourTextRect { get; set; }
+
         [JsonProperty("flavourTextColour")]
         public string flavourTextColour { get; set; }
     }
