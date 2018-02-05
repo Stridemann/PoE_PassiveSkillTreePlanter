@@ -144,7 +144,9 @@ namespace PassiveSkillTreePlanter
         private void ImGuiMenu()
         {
             if (!Settings.ShowWindow) return;
-            ImGuiExtension.BeginWindow($"{PluginName} Settings", Settings.LastSettingPos.X, Settings.LastSettingPos.Y, Settings.LastSettingSize.X, Settings.LastSettingSize.Y);
+            bool isOpened = Settings.ShowWindow.Value;
+            ImGuiExtension.BeginWindow($"{PluginName} Settings", ref isOpened, Settings.LastSettingPos.X, Settings.LastSettingPos.Y, Settings.LastSettingSize.X, Settings.LastSettingSize.Y);
+            Settings.ShowWindow.Value = isOpened;
             if (ImGui.Button("Open Build Folder")) Process.Start(SkillTreeUrlFilesDir);
             ImGui.SameLine();
             if (ImGui.Button("Reload List")) LoadBuildFiles();
