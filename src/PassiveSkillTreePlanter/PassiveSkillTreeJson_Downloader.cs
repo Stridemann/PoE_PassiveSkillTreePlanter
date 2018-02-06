@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using System.Net.Http;
 using System.Text.RegularExpressions;
-using System.IO;
+using System.Threading.Tasks;
 
 namespace PassiveSkillTreePlanter
 {
@@ -17,7 +13,7 @@ namespace PassiveSkillTreePlanter
 
         public static async Task<string> DownloadSkillTreeToFileAsync(string filePath)
         {
-            var code = await (new HttpClient()).GetStringAsync(TreeAddress);
+            var code = await new HttpClient().GetStringAsync(TreeAddress);
             var regex = new Regex("var passiveSkillTreeData.*");
             var skillTreeObj = regex.Match(code).Value.Replace("\\/", "/");
             skillTreeObj = skillTreeObj.Substring(27, skillTreeObj.Length - 27 - 1) + "";
