@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using ImGuiNET;
+﻿using ImGuiNET;
 using PassiveSkillTreePlanter.SkillTreeJson;
 using PassiveSkillTreePlanter.UrlDecoders;
 using PoeHUD.Framework;
 using PoeHUD.Plugins;
 using PoeHUD.Poe;
 using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Vector2 = System.Numerics.Vector2;
 
 namespace PassiveSkillTreePlanter
@@ -32,6 +32,7 @@ namespace PassiveSkillTreePlanter
         public string AddNewBuildFile = "";
         public string AddNewBuildUrl = "";
         public string CurrentlySelectedBuildFile { get; set; }
+        public string CurrentlySelectedBuildFileEdit { get; set; }
         public string CurrentlySelectedBuildUrl { get; set; }
 
         private string SkillTreeUrlFilesDir => LocalPluginDirectory + @"\" + SkillTreeDir;
@@ -82,6 +83,7 @@ namespace PassiveSkillTreePlanter
 
             //Now Rename the File
             File.Move(oldFilePath, newFilePath);
+            LoadBuildFiles();
             Settings.SelectedURLFile = fileName;
             ReadUrlFromSelectedUrl(Settings.SelectedURLFile);
         }
@@ -89,16 +91,17 @@ namespace PassiveSkillTreePlanter
         public string RemoveAccName(string url)
         {
             // Aim is to remove the string content but keep the info inside the text file incase user wants to revisit that account/char in the future
-            
             if (url.Contains("?accountName"))
-            {
-                url = url.Split(new[] { "?accountName" }, StringSplitOptions.None)[0];
-            }
+                url = url.Split(new[]
+                {
+                        "?accountName"
+                }, StringSplitOptions.None)[0];
             // If string contains characterName but no 
             if (url.Contains("?characterName"))
-            {
-                url = url.Split(new[] { "?characterName" }, StringSplitOptions.None)[0];
-            }
+                url = url.Split(new[]
+                {
+                        "?characterName"
+                }, StringSplitOptions.None)[0];
             return url;
         }
 
@@ -106,7 +109,6 @@ namespace PassiveSkillTreePlanter
         {
             fileName = CleanFileName(fileName);
             var filePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
-
             if (!File.Exists(filePath))
             {
                 LogError("PassiveSkillTreePlanter: File doesnt exist", 10);
@@ -162,19 +164,24 @@ namespace PassiveSkillTreePlanter
 
         private void ImGuiMenu()
         {
-            string[] settingName = { "Build Selection", "Build Edit", "Add Build", "Colors", "Sliders" };
+            string[] settingName =
+            {
+                    "Build Selection",
+                    "Build Edit",
+                    "Add Build",
+                    "Colors",
+                    "Sliders"
+            };
             if (!Settings.ShowWindow) return;
             var isOpened = Settings.ShowWindow.Value;
             ImGuiExtension.BeginWindow($"{PluginName} Settings", ref isOpened, Settings.LastSettingPos.X, Settings.LastSettingPos.Y, Settings.LastSettingSize.X, Settings.LastSettingSize.Y);
             Settings.ShowWindow.Value = isOpened;
             ImGuiNative.igGetContentRegionAvail(out var newcontentRegionArea);
-
             if (ImGui.BeginChild("LeftSettings", new Vector2(newcontentRegionArea.X * 0.25f, newcontentRegionArea.Y), false, WindowFlags.Default))
                 for (var i = 0; i < settingName.Length; i++)
                     if (ImGui.Selectable(settingName[i], selected == i))
                         selected = i;
             ImGui.EndChild();
-
             ImGui.SameLine();
             ImGui.PushStyleVar(StyleVar.ChildRounding, 5.0f);
             ImGuiNative.igGetContentRegionAvail(out newcontentRegionArea);
@@ -191,9 +198,9 @@ namespace PassiveSkillTreePlanter
                     case "Build Edit":
                         if (!string.IsNullOrEmpty(CurrentlySelectedBuildFile))
                         {
-                            CurrentlySelectedBuildFile = ImGuiExtension.InputText("##RenameLabel", CurrentlySelectedBuildFile, 1024, InputTextFlags.EnterReturnsTrue);
+                            CurrentlySelectedBuildFileEdit = ImGuiExtension.InputText("##RenameLabel", CurrentlySelectedBuildFileEdit, 1024, InputTextFlags.EnterReturnsTrue);
                             ImGui.SameLine();
-                            if (ImGui.Button("Rename Build")) RenameFile(CurrentlySelectedBuildFile, Settings.SelectedURLFile);
+                            if (ImGui.Button("Rename Build")) RenameFile(CurrentlySelectedBuildFileEdit, Settings.SelectedURLFile);
                             CurrentlySelectedBuildUrl = ImGuiExtension.InputText("##ChangeURL", CurrentlySelectedBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
                             ImGui.SameLine();
                             if (ImGui.Button("Change URL")) ReplaceUrlContents(Settings.SelectedURLFile, CurrentlySelectedBuildUrl);
@@ -259,7 +266,6 @@ namespace PassiveSkillTreePlanter
 
             // remove ?accountName and such off the end of the string
             skillTreeUrl = RemoveAccName(skillTreeUrl);
-
             if (!DecodeUrl(skillTreeUrl))
             {
                 LogMessage("PassiveSkillTree: Can't decode url from file: " + skillTreeUrlFilePath, 10);
@@ -267,6 +273,7 @@ namespace PassiveSkillTreePlanter
             }
 
             CurrentlySelectedBuildFile = fileName;
+            CurrentlySelectedBuildFileEdit = fileName;
             CurrentlySelectedBuildUrl = File.ReadAllText(skillTreeUrlFilePath);
             ProcessNodes();
         }
