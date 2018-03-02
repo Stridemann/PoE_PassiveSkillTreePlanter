@@ -11,6 +11,7 @@ using PoeHUD.Framework;
 using PoeHUD.Plugins;
 using PoeHUD.Poe;
 using SharpDX;
+using Vector2 = System.Numerics.Vector2;
 
 namespace PassiveSkillTreePlanter
 {
@@ -18,6 +19,7 @@ namespace PassiveSkillTreePlanter
     {
         private const string SkillTreeDataFile = "SkillTreeData.dat";
         private const string SkillTreeDir = "Builds";
+        public static int selected;
         private readonly PoESkillTreeJsonDecoder _skillTreeeData = new PoESkillTreeJsonDecoder();
 
 
@@ -35,7 +37,6 @@ namespace PassiveSkillTreePlanter
         private string SkillTreeUrlFilesDir => LocalPluginDirectory + @"\" + SkillTreeDir;
         private List<string> BuildFiles { get; set; }
         public IntPtr TextEditCallback { get; set; }
-        public static int selected = 0;
 
         public override void Initialise()
         {
@@ -85,17 +86,34 @@ namespace PassiveSkillTreePlanter
             ReadUrlFromSelectedUrl(Settings.SelectedURLFile);
         }
 
+        public string RemoveAccName(string url)
+        {
+            // Aim is to remove the string content but keep the info inside the text file incase user wants to revisit that account/char in the future
+            
+            if (url.Contains("?accountName"))
+            {
+                url = url.Split(new[] { "?accountName" }, StringSplitOptions.None)[0];
+            }
+            // If string contains characterName but no 
+            if (url.Contains("?characterName"))
+            {
+                url = url.Split(new[] { "?characterName" }, StringSplitOptions.None)[0];
+            }
+            return url;
+        }
+
         public void ReplaceUrlContents(string fileName, string newContents)
         {
             fileName = CleanFileName(fileName);
             var filePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
+
             if (!File.Exists(filePath))
             {
                 LogError("PassiveSkillTreePlanter: File doesnt exist", 10);
                 return;
             }
 
-            if (!IsBase64String(newContents))
+            if (!IsBase64String(RemoveAccName(newContents)))
             {
                 LogError("PassiveSkillTreePlanter: Invalid URL or you are trying to add something that is not a pathofexile.com build URL", 10);
                 return;
@@ -149,20 +167,18 @@ namespace PassiveSkillTreePlanter
             var isOpened = Settings.ShowWindow.Value;
             ImGuiExtension.BeginWindow($"{PluginName} Settings", ref isOpened, Settings.LastSettingPos.X, Settings.LastSettingPos.Y, Settings.LastSettingSize.X, Settings.LastSettingSize.Y);
             Settings.ShowWindow.Value = isOpened;
+            ImGuiNative.igGetContentRegionAvail(out var newcontentRegionArea);
 
-            var listWidth = ImGui.GetWindowContentRegionWidth() * 0.25f;
-            var activeSettingWidth = ImGui.GetWindowContentRegionWidth() * 0.75f - 5;
-            var windowHeight = ImGui.GetWindowSize().Y - 35;
-
-            if (ImGui.BeginChild("LeftSettings", new System.Numerics.Vector2(listWidth, windowHeight), false, WindowFlags.Default))
+            if (ImGui.BeginChild("LeftSettings", new Vector2(newcontentRegionArea.X * 0.25f, newcontentRegionArea.Y), false, WindowFlags.Default))
                 for (var i = 0; i < settingName.Length; i++)
                     if (ImGui.Selectable(settingName[i], selected == i))
                         selected = i;
-
             ImGui.EndChild();
+
             ImGui.SameLine();
             ImGui.PushStyleVar(StyleVar.ChildRounding, 5.0f);
-            if (ImGui.BeginChild("RightSettings", new System.Numerics.Vector2(activeSettingWidth, windowHeight), true, WindowFlags.Default))
+            ImGuiNative.igGetContentRegionAvail(out newcontentRegionArea);
+            if (ImGui.BeginChild("RightSettings", new Vector2(newcontentRegionArea.X, newcontentRegionArea.Y), true, WindowFlags.Default))
                 switch (settingName[selected])
                 {
                     case "Build Selection":
@@ -177,7 +193,7 @@ namespace PassiveSkillTreePlanter
                         {
                             CurrentlySelectedBuildFile = ImGuiExtension.InputText("##RenameLabel", CurrentlySelectedBuildFile, 1024, InputTextFlags.EnterReturnsTrue);
                             ImGui.SameLine();
-                            if (ImGui.Button("Build")) RenameFile(CurrentlySelectedBuildFile, Settings.SelectedURLFile);
+                            if (ImGui.Button("Rename Build")) RenameFile(CurrentlySelectedBuildFile, Settings.SelectedURLFile);
                             CurrentlySelectedBuildUrl = ImGuiExtension.InputText("##ChangeURL", CurrentlySelectedBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
                             ImGui.SameLine();
                             if (ImGui.Button("Change URL")) ReplaceUrlContents(Settings.SelectedURLFile, CurrentlySelectedBuildUrl);
@@ -215,9 +231,10 @@ namespace PassiveSkillTreePlanter
                 Settings.LastSettingPos = ImGui.GetWindowPosition();
                 Settings.LastSettingSize = ImGui.GetWindowSize();
             }
+
             ImGui.EndWindow();
         }
-        
+
         private void ReadUrlFromSelectedUrl(string fileName)
         {
             var skillTreeUrlFilePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
@@ -239,6 +256,10 @@ namespace PassiveSkillTreePlanter
             match = rgx.Match(skillTreeUrl);
             if (match.Success)
                 skillTreeUrl = skillTreeUrl.Replace(match.Groups[1].Value, "");
+
+            // remove ?accountName and such off the end of the string
+            skillTreeUrl = RemoveAccName(skillTreeUrl);
+
             if (!DecodeUrl(skillTreeUrl))
             {
                 LogMessage("PassiveSkillTree: Can't decode url from file: " + skillTreeUrlFilePath, 10);
@@ -364,7 +385,7 @@ namespace PassiveSkillTreePlanter
                 {
                     var linkDrawPosX = (_uiSkillTreeBase.X + link.X + offsetX) * scale;
                     var linkDrawPosY = (_uiSkillTreeBase.Y + link.Y + offsetY) * scale;
-                    if (Settings.LineWidth > 0) Graphics.DrawLine(new Vector2(posX, posY), new Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.LineColor);
+                    if (Settings.LineWidth > 0) Graphics.DrawLine(new SharpDX.Vector2(posX, posY), new SharpDX.Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.LineColor);
                 }
             }
         }
