@@ -283,7 +283,7 @@ namespace PassiveSkillTreePlanter
             }
 
             var strings = File.ReadAllLines(skillTreeUrlFilePath);
-            if (strings.Length == 1)
+            if (strings.Length == 1 || strings[1] == string.Empty)
             {
                 LogMessage("PassiveSkillTree: This build has no saved Forum link.", 10);
                 return;
