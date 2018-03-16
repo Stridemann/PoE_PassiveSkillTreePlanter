@@ -31,9 +31,11 @@ namespace PassiveSkillTreePlanter
 
         public string AddNewBuildFile = "";
         public string AddNewBuildUrl = "";
+        public string AddNewBuildThreadUrl = "";
         public string CurrentlySelectedBuildFile { get; set; }
         public string CurrentlySelectedBuildFileEdit { get; set; }
         public string CurrentlySelectedBuildUrl { get; set; }
+        public string CurrentlySelectedBuildForumThread { get; set; }
 
         private string SkillTreeUrlFilesDir => LocalPluginDirectory + @"\" + SkillTreeDir;
         private List<string> BuildFiles { get; set; }
@@ -126,7 +128,21 @@ namespace PassiveSkillTreePlanter
             ReadUrlFromSelectedUrl(Settings.SelectedURLFile);
         }
 
-        public void AddNewBuild(string buildName, string buildUrl)
+        public void ReplaceThreadUrlContents(string fileName, string newContents)
+        {
+            var skillTreeUrlFilePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
+            if (!File.Exists(skillTreeUrlFilePath))
+                return;
+            var strings = File.ReadAllLines(skillTreeUrlFilePath);
+            var newString = new List<string>
+            {
+                    strings[0],
+                    newContents
+            };
+            File.WriteAllLines(skillTreeUrlFilePath, newString);
+        }
+
+        public void AddNewBuild(string buildName, string buildUrl, string buildThreadUrl)
         {
             var newFilePath = Path.Combine(SkillTreeUrlFilesDir, buildName + ".txt");
             if (File.Exists(newFilePath))
@@ -141,7 +157,13 @@ namespace PassiveSkillTreePlanter
                 return;
             }
 
-            File.WriteAllText(newFilePath, buildUrl);
+            var newString = new List<string>();
+            newString.Add(buildUrl);
+            if (!string.IsNullOrEmpty(buildThreadUrl))
+            {
+                newString.Add(buildThreadUrl);
+            }
+            File.WriteAllLines(newFilePath, newString);
             LoadBuildFiles();
         }
 
@@ -192,6 +214,8 @@ namespace PassiveSkillTreePlanter
                         if (ImGui.Button("Open Build Folder")) Process.Start(SkillTreeUrlFilesDir);
                         ImGui.SameLine();
                         if (ImGui.Button("Reload List")) LoadBuildFiles();
+                        ImGui.SameLine();
+                        if (ImGui.Button("Open Forum Thread")) ReadHtmlLineFromFile(Settings.SelectedURLFile);
                         Settings.SelectedURLFile = ImGuiExtension.ComboBox("Build Files", Settings.SelectedURLFile, BuildFiles, out var tempBool, ComboFlags.HeightLarge);
                         if (tempBool) ReadUrlFromSelectedUrl(Settings.SelectedURLFile);
                         break;
@@ -201,9 +225,14 @@ namespace PassiveSkillTreePlanter
                             CurrentlySelectedBuildFileEdit = ImGuiExtension.InputText("##RenameLabel", CurrentlySelectedBuildFileEdit, 1024, InputTextFlags.EnterReturnsTrue);
                             ImGui.SameLine();
                             if (ImGui.Button("Rename Build")) RenameFile(CurrentlySelectedBuildFileEdit, Settings.SelectedURLFile);
+
                             CurrentlySelectedBuildUrl = ImGuiExtension.InputText("##ChangeURL", CurrentlySelectedBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
                             ImGui.SameLine();
                             if (ImGui.Button("Change URL")) ReplaceUrlContents(Settings.SelectedURLFile, CurrentlySelectedBuildUrl);
+
+                            CurrentlySelectedBuildForumThread = ImGuiExtension.InputText("##ChangeThreadURL", CurrentlySelectedBuildForumThread, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
+                            ImGui.SameLine();
+                            if (ImGui.Button("Change Thread URL")) ReplaceThreadUrlContents(Settings.SelectedURLFile, CurrentlySelectedBuildForumThread);
                         }
                         else
                             ImGui.Text("No Build Selected");
@@ -212,11 +241,13 @@ namespace PassiveSkillTreePlanter
                     case "Add Build":
                         AddNewBuildFile = ImGuiExtension.InputText("Build Name", AddNewBuildFile, 1024, InputTextFlags.EnterReturnsTrue);
                         AddNewBuildUrl = ImGuiExtension.InputText("Build URL", AddNewBuildUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
+                        AddNewBuildThreadUrl = ImGuiExtension.InputText("Build Thread URL", AddNewBuildThreadUrl, 1024, InputTextFlags.EnterReturnsTrue | InputTextFlags.AutoSelectAll);
                         if (ImGui.Button("Create Build"))
                         {
-                            AddNewBuild(AddNewBuildFile, AddNewBuildUrl);
+                            AddNewBuild(AddNewBuildFile, AddNewBuildUrl, AddNewBuildThreadUrl);
                             AddNewBuildFile = "";
                             AddNewBuildUrl = "";
+                            AddNewBuildThreadUrl = "";
                         }
 
                         break;
@@ -242,6 +273,50 @@ namespace PassiveSkillTreePlanter
             ImGui.EndWindow();
         }
 
+        private void ReadHtmlLineFromFile(string fileName)
+        {
+            var skillTreeUrlFilePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
+            if (!File.Exists(skillTreeUrlFilePath))
+            {
+                LogMessage("PassiveSkillTree: Select build url from list in options.", 10);
+                return;
+            }
+
+            var strings = File.ReadAllLines(skillTreeUrlFilePath);
+            if (strings.Length == 1 || strings[1] == string.Empty)
+            {
+                LogMessage("PassiveSkillTree: This build has no saved Forum link.", 10);
+                return;
+            }
+
+            if (strings[1] != null && strings[1] != string.Empty)
+            {
+                System.Diagnostics.Process.Start(strings[1]);
+            }
+        }
+
+        private string GetHtmlLineFromFile(string fileName)
+        {
+            var skillTreeUrlFilePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
+            if (!File.Exists(skillTreeUrlFilePath))
+            {
+                return string.Empty;
+            }
+
+            var strings = File.ReadAllLines(skillTreeUrlFilePath);
+            if (strings.Length == 1)
+            {
+                return string.Empty;
+            }
+
+            if (strings[1] != null && strings[1] != string.Empty)
+            {
+                return strings[1];
+            }
+
+            return string.Empty;
+        }
+
         private void ReadUrlFromSelectedUrl(string fileName)
         {
             var skillTreeUrlFilePath = Path.Combine(SkillTreeUrlFilesDir, fileName + ".txt");
@@ -252,7 +327,7 @@ namespace PassiveSkillTreePlanter
                 return;
             }
 
-            var skillTreeUrl = File.ReadAllText(skillTreeUrlFilePath);
+            var skillTreeUrl = File.ReadLines(skillTreeUrlFilePath).First();
 
             // replaces the game tree version "x.x.x/"
             var rgx = new Regex("^https:\\/\\/www.pathofexile.com\\/fullscreen-passive-skill-tree\\/(([0-9]\\W){3})", RegexOptions.IgnoreCase);
@@ -274,7 +349,8 @@ namespace PassiveSkillTreePlanter
 
             CurrentlySelectedBuildFile = fileName;
             CurrentlySelectedBuildFileEdit = fileName;
-            CurrentlySelectedBuildUrl = File.ReadAllText(skillTreeUrlFilePath);
+            CurrentlySelectedBuildUrl = File.ReadAllLines(skillTreeUrlFilePath).First();
+            CurrentlySelectedBuildForumThread = GetHtmlLineFromFile(fileName);
             ProcessNodes();
         }
 
