@@ -194,7 +194,7 @@ namespace PassiveSkillTreePlanter
                     "Sliders"
             };
             ImGuiNative.igGetContentRegionAvail(out var newcontentRegionArea);
-            if (ImGui.BeginChild("LeftSettings", new Vector2(newcontentRegionArea.X * 0.25f, newcontentRegionArea.Y), false, WindowFlags.Default))
+            if (ImGui.BeginChild("LeftSettings", new Vector2(150, newcontentRegionArea.Y), false, WindowFlags.Default))
                 for (var i = 0; i < settingName.Length; i++)
                     if (ImGui.Selectable(settingName[i], selected == i))
                         selected = i;
