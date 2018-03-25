@@ -20,7 +20,7 @@ namespace PassiveSkillTreePlanter
         private const string SkillTreeDataFile = "SkillTreeData.dat";
         private const string SkillTreeDir = "Builds";
         public static int selected;
-        private readonly PoESkillTreeJsonDecoder _skillTreeeData = new PoESkillTreeJsonDecoder();
+        private PoESkillTreeJsonDecoder _skillTreeeData = new PoESkillTreeJsonDecoder();
 
 
         private bool _bUiRootInitialized;
@@ -43,6 +43,10 @@ namespace PassiveSkillTreePlanter
 
         public override void Initialise()
         {
+            _skillTreeeData = new PoESkillTreeJsonDecoder();
+            _urlNodes.Clear();
+            _drawNodes.Clear();
+
             if (!Directory.Exists(SkillTreeUrlFilesDir))
             {
                 Directory.CreateDirectory(SkillTreeUrlFilesDir);
