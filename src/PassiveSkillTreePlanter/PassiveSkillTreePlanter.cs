@@ -20,7 +20,7 @@ namespace PassiveSkillTreePlanter
         private const string SkillTreeDataFile = "SkillTreeData.dat";
         private const string SkillTreeDir = "Builds";
         public static int selected;
-        private readonly PoESkillTreeJsonDecoder _skillTreeeData = new PoESkillTreeJsonDecoder();
+        private PoESkillTreeJsonDecoder _skillTreeeData = new PoESkillTreeJsonDecoder();
 
 
         private bool _bUiRootInitialized;
@@ -43,6 +43,10 @@ namespace PassiveSkillTreePlanter
 
         public override void Initialise()
         {
+            _skillTreeeData = new PoESkillTreeJsonDecoder();
+            _urlNodes.Clear();
+            _drawNodes.Clear();
+
             if (!Directory.Exists(SkillTreeUrlFilesDir))
             {
                 Directory.CreateDirectory(SkillTreeUrlFilesDir);
@@ -60,7 +64,6 @@ namespace PassiveSkillTreePlanter
         {
             base.Render();
             ExtRender();
-            ImGuiMenu();
         }
 
         private void LoadBuildFiles()
@@ -183,8 +186,8 @@ namespace PassiveSkillTreePlanter
                 return false;
             }
         }
-
-        private void ImGuiMenu()
+        
+        public override void DrawSettingsMenu()
         {
             string[] settingName =
             {
@@ -194,12 +197,8 @@ namespace PassiveSkillTreePlanter
                     "Colors",
                     "Sliders"
             };
-            if (!Settings.ShowWindow) return;
-            var isOpened = Settings.ShowWindow.Value;
-            ImGuiExtension.BeginWindow($"{PluginName} Settings", ref isOpened, Settings.LastSettingPos.X, Settings.LastSettingPos.Y, Settings.LastSettingSize.X, Settings.LastSettingSize.Y);
-            Settings.ShowWindow.Value = isOpened;
             ImGuiNative.igGetContentRegionAvail(out var newcontentRegionArea);
-            if (ImGui.BeginChild("LeftSettings", new Vector2(newcontentRegionArea.X * 0.25f, newcontentRegionArea.Y), false, WindowFlags.Default))
+            if (ImGui.BeginChild("LeftSettings", new Vector2(150, newcontentRegionArea.Y), false, WindowFlags.Default))
                 for (var i = 0; i < settingName.Length; i++)
                     if (ImGui.Selectable(settingName[i], selected == i))
                         selected = i;
@@ -262,15 +261,6 @@ namespace PassiveSkillTreePlanter
                 }
             ImGui.PopStyleVar();
             ImGui.EndChild();
-
-            // Storing window Position and Size changed by the user
-            if (ImGui.GetWindowHeight() > 21)
-            {
-                Settings.LastSettingPos = ImGui.GetWindowPosition();
-                Settings.LastSettingSize = ImGui.GetWindowSize();
-            }
-
-            ImGui.EndWindow();
         }
 
         private void ReadHtmlLineFromFile(string fileName)
