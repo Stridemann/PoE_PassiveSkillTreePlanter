@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using SharpDX;
+using PoeHUD.DebugPlug;
 
 namespace PassiveSkillTreePlanter.SkillTreeJson
 {
@@ -23,19 +24,21 @@ namespace PassiveSkillTreePlanter.SkillTreeJson
                         // This one is known: "509":{"x":_,"y":_,"oo":[],"n":[]}} has an Array in "oo".
                         // if (args.ErrorContext.Path != "groups.509.oo")
                         // PoeHUD.Plugins.BasePlugin.LogError("Exception while deserializing Json tree" + args.ErrorContext.Error, 5);
+                        if (args.ErrorContext.Path == null || !args.ErrorContext.Path.EndsWith(".oo"))
+                            DebugPlugin.LogMsg("Exception while deserializing Json tree" + args.ErrorContext.Error, 2);
                         args.ErrorContext.Handled = true;
                     }
             };
+
             SkillTree = JsonConvert.DeserializeObject<PoESkillTree>(jsonTree, jss);
             Skillnodes = new Dictionary<ushort, SkillNode>();
             NodeGroups = new List<SkillNodeGroup>();
             foreach (var nd in SkillTree.nodes)
             {
-                var skillNode = new SkillNode { Id = nd.id, Name = nd.dn, Orbit = nd.o, OrbitIndex = nd.oidx, bJevel = nd.isJewelSocket, bKeyStone = nd.ks, bMastery = nd.m, bMult = nd.isMultipleChoice, bNotable = nd.not, linkedNodes = nd.ot };
+                var skillNode = new SkillNode { Id = nd.Value.id, Name = nd.Value.dn, Orbit = nd.Value.o, OrbitIndex = nd.Value.oidx, bJevel = nd.Value.isJewelSocket, bKeyStone = nd.Value.ks, bMastery = nd.Value.m, bMult = nd.Value.isMultipleChoice, bNotable = nd.Value.not, linkedNodes = nd.Value._out };
                 Nodes.Add(skillNode);
-                Skillnodes.Add(nd.id, skillNode);
+                Skillnodes.Add(nd.Value.id, skillNode);
             }
-
             NodeGroups = new List<SkillNodeGroup>();
             foreach (var gp in SkillTree.groups)
             {

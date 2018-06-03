@@ -85,7 +85,9 @@ namespace PassiveSkillTreePlanter
         public int ia { get; set; }
 
         [JsonProperty("out")]
-        public List<ushort> ot { get; set; }
+        public List<ushort> _out { get; set; }
+        [JsonProperty("in")]
+        public List<ushort> _in { get; set; }
     }
 
     public class JsonConstants
@@ -126,7 +128,9 @@ namespace PassiveSkillTreePlanter
 
         public Main main { get; set; }
 
-        public Node[] nodes { get; set; }
+        public Dictionary<int, Node> nodes { get; set; }
+
+        public Dictionary<string, Node> nodesDict { get; set; }
 
         public int min_x { get; set; }
 
@@ -162,16 +166,12 @@ namespace PassiveSkillTreePlanter
     {
         [JsonProperty("name")]
         public string name { get; set; }
-
         [JsonProperty("displayName")]
         public string displayName { get; set; }
-
         [JsonProperty("flavourText")]
         public string flavourText { get; set; }
-
         [JsonProperty("flavourTextRect")]
         public string flavourTextRect { get; set; }
-
         [JsonProperty("flavourTextColour")]
         public string flavourTextColour { get; set; }
     }
