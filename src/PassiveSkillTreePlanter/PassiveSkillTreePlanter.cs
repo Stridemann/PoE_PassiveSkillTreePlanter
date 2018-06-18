@@ -251,11 +251,15 @@ namespace PassiveSkillTreePlanter
 
                         break;
                     case "Colors":
-                        Settings.BorderColor.Value = ImGuiExtension.ColorPicker("Border Color", Settings.BorderColor);
+                        Settings.PickedBorderColor.Value = ImGuiExtension.ColorPicker("Border Color", Settings.PickedBorderColor);
+                        Settings.UnpickedBorderColor.Value = ImGuiExtension.ColorPicker("Unpicked Border Color", Settings.UnpickedBorderColor);
+                        Settings.WrongPickedBorderColor.Value = ImGuiExtension.ColorPicker("Wrong picked Border Color", Settings.WrongPickedBorderColor);
                         Settings.LineColor.Value = ImGuiExtension.ColorPicker("Line Color", Settings.LineColor);
                         break;
                     case "Sliders":
-                        Settings.BorderWidth.Value = ImGuiExtension.IntSlider("Border Width", Settings.BorderWidth);
+                        Settings.PickedBorderWidth.Value = ImGuiExtension.IntSlider("Picked Border Width", Settings.PickedBorderWidth);
+                        Settings.UnpickedBorderWidth.Value = ImGuiExtension.IntSlider("Unpicked Border Width", Settings.UnpickedBorderWidth);
+                        Settings.WrongPickedBorderWidth.Value = ImGuiExtension.IntSlider("WrongPicked Border Width", Settings.WrongPickedBorderWidth);
                         Settings.LineWidth.Value = ImGuiExtension.IntSlider("Line Width", Settings.LineWidth);
                         break;
                 }
@@ -448,19 +452,65 @@ namespace PassiveSkillTreePlanter
             //Hand-picked values
             var offsetX = 12465;
             var offsetY = 11582;
+            var passives = GameController.Game.IngameState.ServerData.PassiveSkillIds;
+
+            int totalNodes = _drawNodes.Count;
+            int pickedNodes = passives.Count;
+            int wrongPicked = 0;
+
             foreach (var node in _drawNodes)
             {
                 var drawSize = node.DrawSize * scale;
                 var posX = (_uiSkillTreeBase.X + node.DrawPosition.X + offsetX) * scale;
                 var posY = (_uiSkillTreeBase.Y + node.DrawPosition.Y + offsetY) * scale;
-                Graphics.DrawFrame(new RectangleF(posX - drawSize / 2, posY - drawSize / 2, drawSize, drawSize), Settings.BorderWidth, Settings.BorderColor);
-                foreach (var link in node.DrawNodeLinks)
+
+                var color = Settings.PickedBorderColor;
+                var vWidth = Settings.PickedBorderWidth.Value;
+                if (!passives.Contains(node.Id))
                 {
-                    var linkDrawPosX = (_uiSkillTreeBase.X + link.X + offsetX) * scale;
-                    var linkDrawPosY = (_uiSkillTreeBase.Y + link.Y + offsetY) * scale;
-                    if (Settings.LineWidth > 0) Graphics.DrawLine(new SharpDX.Vector2(posX, posY), new SharpDX.Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.LineColor);
+                    vWidth = Settings.UnpickedBorderWidth.Value;
+                    color = Settings.UnpickedBorderColor;
+                }
+                else
+                {
+                    passives.Remove(node.Id);
+                }
+
+                Graphics.DrawFrame(new RectangleF(posX - drawSize / 2, posY - drawSize / 2, drawSize, drawSize), vWidth, color);
+
+                if (Settings.LineWidth > 0)
+                {
+                    foreach (var link in node.DrawNodeLinks)
+                    {
+                        var linkDrawPosX = (_uiSkillTreeBase.X + link.X + offsetX) * scale;
+                        var linkDrawPosY = (_uiSkillTreeBase.Y + link.Y + offsetY) * scale;
+
+                        Graphics.DrawLine(new SharpDX.Vector2(posX, posY), new SharpDX.Vector2(linkDrawPosX, linkDrawPosY), Settings.LineWidth, Settings.LineColor);
+                    }
                 }
             }
+
+            wrongPicked = passives.Count;
+            foreach (var passiveId in passives)
+            {
+                if(_skillTreeeData.Skillnodes.TryGetValue(passiveId, out var node))
+                {
+                    node.Init();
+                    var drawSize = node.DrawSize * scale;
+                    var posX = (_uiSkillTreeBase.X + node.DrawPosition.X + offsetX) * scale;
+                    var posY = (_uiSkillTreeBase.Y + node.DrawPosition.Y + offsetY) * scale;
+
+                    Graphics.DrawFrame(new RectangleF(posX - drawSize / 2, posY - drawSize / 2, drawSize, drawSize), Settings.WrongPickedBorderWidth.Value, Settings.WrongPickedBorderColor);
+                }
+            }
+
+
+            SharpDX.Vector2 textPos = new SharpDX.Vector2(50, 300);
+            Graphics.DrawText("Total Tree Nodes: " + totalNodes, 15, textPos, Color.White);
+            textPos.Y += 20;
+            Graphics.DrawText("Picked Nodes: " + pickedNodes, 15, textPos, Color.Green);
+            textPos.Y += 20;
+            Graphics.DrawText("Wrong Picked Nodes: " + wrongPicked, 15, textPos, Color.Red);
         }
     }
 }

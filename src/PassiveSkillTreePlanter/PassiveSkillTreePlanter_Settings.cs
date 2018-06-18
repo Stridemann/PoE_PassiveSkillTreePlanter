@@ -11,8 +11,9 @@ namespace PassiveSkillTreePlanter
         {
             var centerPos = BasePlugin.API.GameController.Window.GetWindowRectangle().Center;
             Enable = false;
-            BorderWidth = new RangeNode<int>(1, 1, 5);
-            BorderColor = new ColorNode(Color.Red);
+            PickedBorderColor = new ColorNode(Color.Gray);
+            UnpickedBorderColor = new ColorNode(Color.Green);
+            WrongPickedBorderColor = new ColorNode(Color.Red);
             LineWidth = new RangeNode<int>(3, 0, 5);
             LineColor = new ColorNode(new Color(0, 255, 0, 50));
             ShowWindow = false;
@@ -21,9 +22,13 @@ namespace PassiveSkillTreePlanter
             LastSettingPos = new ImGuiVector2(centerPos.X - LastSettingSize.X / 2, centerPos.Y - LastSettingSize.Y / 2);
         }
 
-        public RangeNode<int> BorderWidth { get; set; }
+        public RangeNode<int> PickedBorderWidth { get; set; } = new RangeNode<int>(1, 1, 5);
+        public RangeNode<int> UnpickedBorderWidth { get; set; } = new RangeNode<int>(3, 1, 5);
+        public RangeNode<int> WrongPickedBorderWidth { get; set; } = new RangeNode<int>(3, 1, 5);
 
-        public ColorNode BorderColor { get; set; }
+        public ColorNode PickedBorderColor { get; set; }
+        public ColorNode UnpickedBorderColor { get; set; }
+        public ColorNode WrongPickedBorderColor { get; set; }
 
         public RangeNode<int> LineWidth { get; set; }
 
