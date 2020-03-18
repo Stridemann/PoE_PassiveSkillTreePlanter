@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+using ImGuiNET;
 using PassiveSkillTreePlanter.SkillTreeJson;
 using PassiveSkillTreePlanter.UrlDecoders;
 using PoeHUD.Framework;
@@ -324,11 +324,11 @@ namespace PassiveSkillTreePlanter
             var skillTreeUrl = File.ReadLines(skillTreeUrlFilePath).First();
 
             // replaces the game tree version "x.x.x/"
-            var rgx = new Regex("^https:\\/\\/www.pathofexile.com\\/fullscreen-passive-skill-tree\\/(([0-9]\\W){3})", RegexOptions.IgnoreCase);
+            var rgx = new Regex("^https:\\/\\/www.pathofexile.com\\/fullscreen-passive-skill-tree\\/(([0-9]{1,3)\\W){3})", RegexOptions.IgnoreCase);
             var match = rgx.Match(skillTreeUrl);
             if (match.Success)
                 skillTreeUrl = skillTreeUrl.Replace(match.Groups[1].Value, "");
-            rgx = new Regex("^https:\\/\\/www.pathofexile.com\\/passive-skill-tree\\/(([0-9]\\W){3})", RegexOptions.IgnoreCase);
+            rgx = new Regex("^https:\\/\\/www.pathofexile.com\\/passive-skill-tree\\/(([0-9]{1,3)\\W){3})", RegexOptions.IgnoreCase);
             match = rgx.Match(skillTreeUrl);
             if (match.Success)
                 skillTreeUrl = skillTreeUrl.Replace(match.Groups[1].Value, "");
